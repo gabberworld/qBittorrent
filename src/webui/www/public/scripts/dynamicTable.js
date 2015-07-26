@@ -49,9 +49,9 @@ var dynamicTable = new Class({
         },
 
         initColumns : function () {
+            this.newColumn('priority', 'width: 30px; cursor: pointer', '#');
             this.newColumn('state_icon', 'width: 16px', '');
             this.newColumn('name', 'min-width: 200px; cursor: pointer', 'QBT_TR(Name)QBT_TR');
-            this.newColumn('priority', 'width: 90px; cursor: pointer', '#');
             this.newColumn('size', 'width: 100px; cursor: pointer', 'QBT_TR(Size)QBT_TR');
             this.newColumn('progress', 'width: 80px; cursor: pointer', 'QBT_TR(Done)QBT_TR');
             this.newColumn('num_seeds', 'width: 100px; cursor: pointer', 'QBT_TR(Seeds)QBT_TR');
@@ -250,15 +250,15 @@ var dynamicTable = new Class({
             var state = row['full_data'].state;
             switch(filterName) {
                 case 'downloading':
-                    if ((state != 'downloading') && !~state.indexOf('DL'))
+                    if (state != 'downloading' && !~state.indexOf('DL'))
                         return false;
                     break;
                 case 'seeding':
-                    if ((state != 'uploading') && (state != 'stalledUP') && (state != 'queuedUP') && (state != 'checkingUP'))
+                    if (state != 'uploading' && state != 'forcedUP' && state != 'stalledUP' && state != 'queuedUP' && state != 'checkingUP')
                         return false;
                     break;
                 case 'completed':
-                    if ((state != 'uploading') && !~state.indexOf('UP'))
+                    if (state != 'uploading' && !~state.indexOf('UP'))
                         return false;
                     break;
                 case 'paused':
@@ -270,11 +270,11 @@ var dynamicTable = new Class({
                         return false;
                     break;
                 case 'active':
-                    if ((state != 'uploading') && (state != 'downloading'))
+                    if (state != 'downloading' && state != 'forcedDL' && state != 'uploading' && state != 'forcedUP')
                         return false;
                     break;
                 case 'inactive':
-                    if ((state == 'uploading') || (state == 'downloading'))
+                    if (state == 'downloading' || state == 'forcedDL' || state == 'uploading'  || state == 'forcedUP')
                         return false;
                     break;
             }
@@ -458,7 +458,13 @@ var dynamicTable = new Class({
             data = row[fullUpdate ? 'full_data' : 'data'];
 
             tds = tr.getElements('td');
+            for (var i = 0; i < this.columns.length; i++) {
+                if (data.hasOwnProperty(this.columns[i].dataProperties[0]))
+                    this.columns[i].updateTd(tds[i], row);
+            }
+            row['data'] = {};
 
+            /*
             for(var prop in data)
                 for (var i = 0; i < this.columns.length; i++)
                     for (var j = 0; j < this.columns[i].dataProperties.length; j++)
@@ -473,6 +479,7 @@ var dynamicTable = new Class({
                 if (tr.hasClass('selected'))
                     tr.removeClass('selected');
             }
+            */
         },
 
         removeRow : function (hash) {
@@ -501,12 +508,23 @@ var dynamicTable = new Class({
             this.columns['state_icon'].updateTd = function (td, row) {
                 var state = this.getRowValue(row);
 
-                if (state == "pausedUP" || state == "pausedDL")
+                if (state == "forcedDL" || state == "metaDL")
+                    state = "downloading";
+                else if (state == "allocating")
+                    state = "stalledDL";
+                else if (state == "forcedUP")
+                    state = "uploading";
+                else if (state == "pausedDL")
                     state = "paused";
-                else if (state == "queuedUP" || state == "queuedDL")
+                else if (state == "pausedUP")
+                    state = "completed";
+                else if (state == "queuedDL" || state == "queuedUP")
                     state = "queued";
-                else if (state == "checkingUP" || state == "checkingDL")
+                else if (state == "checkingDL" || state == "checkingUP" ||
+                        state == "queuedForChecking" || state == "checkingResumeData")
                     state = "checking";
+                else if (state == "unknown")
+                    state = "error";
 
                 var img_path = 'images/skin/' + state + '.png';
 
@@ -522,30 +540,31 @@ var dynamicTable = new Class({
                     }));
             };
 
-            // name
-
-            this.columns['name'].updateTd = function (td, row) {
-                td.set('html', escapeHtml(this.getRowValue(row)));
-            };
-
             // priority
 
             this.columns['priority'].updateTd = function (td, row) {
                 var priority = this.getRowValue(row);
-                td.set('html', priority < 0 ? null : priority);
+                td.set('html', priority < 1 ? '*' : priority);
             };
+
             this.columns['priority'].compareRows = function (row1, row2) {
                 var row1_val = this.getRowValue(row1);
                 var row2_val = this.getRowValue(row2);
-                if (row1_val == -1)
+                if (row1_val < 1)
                     row1_val = 1000000;
-                if (row2_val == -1)
+                if (row2_val < 1)
                     row2_val = 1000000;
                 if (row1_val < row2_val)
                     return -1;
                 else if (row1_val > row2_val)
                     return 1;
                 else return 0;
+            };
+
+            // name
+
+            this.columns['name'].updateTd = function (td, row) {
+                td.set('html', escapeHtml(this.getRowValue(row)));
             };
 
             // size

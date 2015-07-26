@@ -24,12 +24,6 @@ AC_ARG_WITH(libtorrent-rasterbar0.16,
             [],
             [with_libtorrent_rasterbar0_16=no])
 
-AC_ARG_WITH(geoip-database-embedded,
-            [AS_HELP_STRING([--with-geoip-database-embedded],
-                            [Embed the GeoIP database in the qBittorrent executable (please follow instructions in src/geoip/README) (default=no)])],
-            [],
-            [with_geoip_database_embedded=no])
-
 AC_ARG_WITH(qtsingleapplication,
             [AS_HELP_STRING([--with-qtsingleapplication=@<:@system|shipped@:>@],
                             [Use the shipped qtsingleapplication library or the system one (default=shipped)])],
@@ -38,7 +32,7 @@ AC_ARG_WITH(qtsingleapplication,
 
 AC_ARG_WITH(qjson,
             [AS_HELP_STRING([--with-qjson=@<:@system|shipped@:>@],
-                            [Use the shipped qjson library or the system one (default=shipped) (Qt4 only])],
+                            [Use the shipped qjson library or the system one (default=shipped) (Qt4 only)])],
             [],
             [with_qjson=shipped])
 
@@ -56,7 +50,7 @@ AC_ARG_ENABLE(gui,
 
 AC_ARG_ENABLE(systemd,
               [AS_HELP_STRING([--enable-systemd],
-                              [Install the systemd service file (GUI only).])],
+                              [Install the systemd service file (headless only).])],
               [],
               [enable_systemd=no])
 
@@ -74,7 +68,7 @@ AC_ARG_ENABLE(qt-dbus,
 
 # Detect OS
 AC_MSG_CHECKING([whether OS is FreeBSD])
-AS_IF([test "x$host_os" = "x*FreeBSD*"],
+AS_IF([expr "$host_os" : ".*freebsd.*" > /dev/null],
       [AC_MSG_RESULT([yes])
       LIBS="-lexecinfo $LIBS"],
       [AC_MSG_RESULT([no])])
@@ -181,7 +175,7 @@ AS_IF([test "x$BOOST_SYSTEM_LIB" = "x"],
       [AC_MSG_NOTICE([Boost.System LIB: $BOOST_SYSTEM_LIB])
       LIBS="$BOOST_SYSTEM_LIB $LIBS"])
 
-AC_MSG_CHECKING([whether to compile using libtorrent-raser 0.16.x])
+AC_MSG_CHECKING([whether to compile using libtorrent-rasterbar 0.16.x])
 AS_CASE(["x$with_libtorrent_rasterbar0_16"],
         ["xno"],
               [AC_MSG_RESULT([no])
@@ -197,17 +191,6 @@ AS_CASE(["x$with_libtorrent_rasterbar0_16"],
                                 LIBS="$libtorrent_LIBS $LIBS"])],
         [AC_MSG_RESULT([$with_libtorrent_rasterbar0_16])
         AC_MSG_ERROR([Unknown option "$with_libtorrent_rasterbar0_16". Use either "yes" or "no".])])
-
-AC_MSG_CHECKING([whether to embed the GeoIP database])
-AS_CASE(["x$with_geoip_database_embedded"],
-        ["xno"],
-              [AC_MSG_RESULT([no])
-              QBT_REMOVE_DEFINES="$QBT_REMOVE_DEFINES WITH_GEOIP_EMBEDDED"],
-        ["xyes"],
-               [AC_MSG_RESULT([yes])
-               QBT_ADD_DEFINES="$QBT_ADD_DEFINES WITH_GEOIP_EMBEDDED"],
-        [AC_MSG_RESULT([$with_geoip_database_embedded])
-        AC_MSG_ERROR([Unknown option "$with_geoip_database_embedded". Use either "yes" or "no".])])
 
 AC_MSG_CHECKING([which qtsingleapplication to use])
 AS_CASE(["x$with_qtsingleapplication"],
@@ -251,15 +234,15 @@ AX_DEFINE_DIR([EXPAND_MANDIR], [mandir])
 
 # Original extract() function contributed by pmzqla
 # $*: Strings to parse
-# Set $DEFINES, $INCLUDES, $OTHER
+# Set $QBT_CONF_DEFINES, $QBT_CONF_INCLUDES, $QBT_CONF_EXTRA_CFLAGS
 extract() {
   if [[ -z "$*" ]]; then
     echo "Input string required"
     return 1
   fi
 
-  # Convert " -" to "\n" if not between quotes
-  string=$(echo " $*" | $SED -e 's: -:\n:g' -e 's:"\(.*\)\n\(.*\)":\"\1 -\2":g' -e "s:'\(.*\)\n\(.*\)':\'\1 -\2':g")
+  # Convert " -" to "\n" if not between quotes and remove possible leading white spaces
+  string=$(echo " $*" | $SED -e 's: -:\n:g' -e 's:"\(.*\)\n\(.*\)":\"\1 -\2":g' -e "s:'\(.*\)\n\(.*\)':\'\1 -\2':g" -e 's/^[[:space:]]*//')
   SAVEIFS=$IFS
   IFS=$(printf "\n\b")
   for i in $string; do
@@ -286,6 +269,8 @@ AC_SUBST(QBT_ADD_DEFINES)
 AC_SUBST(QBT_REMOVE_DEFINES)
 
 AC_OUTPUT(conf.pri)
+AS_IF([test "x$enable_systemd" = "xyes"],
+      [AC_OUTPUT(dist/unix/systemd/qbittorrent-nox.service)])
 
 
 

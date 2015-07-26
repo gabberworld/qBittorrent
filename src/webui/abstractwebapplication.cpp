@@ -35,7 +35,7 @@
 #include <QTemporaryFile>
 #include <QTimer>
 
-#include "preferences.h"
+#include "core/preferences.h"
 #include "websessiondata.h"
 #include "abstractwebapplication.h"
 
@@ -194,7 +194,7 @@ bool AbstractWebApplication::readFile(const QString& path, QByteArray &data, QSt
             QString dataStr = QString::fromUtf8(data.constData());
             translateDocument(dataStr);
 
-            if (path.endsWith("about.html"))
+            if (path.endsWith("about.html") || path.endsWith("index.html") || path.endsWith("client.js"))
                 dataStr.replace("${VERSION}", VERSION);
 
             data = dataStr.toUtf8();
@@ -241,7 +241,7 @@ void AbstractWebApplication::translateDocument(QString& data)
         "HttpServer", "confirmDeletionDlg", "TrackerList", "TorrentFilesModel",
         "options_imp", "Preferences", "TrackersAdditionDlg", "ScanFoldersModel",
         "PropTabBar", "TorrentModel", "downloadFromURL", "MainWindow", "misc",
-        "StatusBar"
+        "StatusBar", "AboutDlg", "about", "PeerListWidget"
     };
     const size_t context_count = sizeof(contexts) / sizeof(contexts[0]);
     int i = 0;
@@ -270,6 +270,10 @@ void AbstractWebApplication::translateDocument(QString& data)
             }
             // Remove keyboard shortcuts
             translation.replace(mnemonic, "");
+
+            // Use HTML code for quotes to prevent issues with JS
+            translation.replace("'", "&#39;");
+            translation.replace("\"", "&#34;");
 
             data.replace(i, regex.matchedLength(), translation);
             i += translation.length();
@@ -312,7 +316,8 @@ void AbstractWebApplication::increaseFailedAttempts()
 bool AbstractWebApplication::isAuthNeeded()
 {
     return (env_.clientAddress != QHostAddress::LocalHost
-            && env_.clientAddress != QHostAddress::LocalHostIPv6)
+            && env_.clientAddress != QHostAddress::LocalHostIPv6
+            && env_.clientAddress != QHostAddress("::ffff:127.0.0.1"))
             || Preferences::instance()->isWebUiLocalAuthEnabled();
 }
 

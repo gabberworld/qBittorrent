@@ -180,8 +180,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>458</width>
-             <height>587</height>
+             <width>474</width>
+             <height>646</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -380,7 +380,7 @@
                <item>
                 <widget class="QCheckBox" name="checkProgramExitConfirm">
                  <property name="text">
-                  <string>Ask for program exit confirmation</string>
+                  <string>Confirmation on exit when torrents are active</string>
                  </property>
                  <property name="checked">
                   <bool>true</bool>
@@ -519,8 +519,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>458</width>
-             <height>905</height>
+             <width>487</width>
+             <height>1005</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout">
@@ -1037,8 +1037,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>357</width>
-             <height>498</height>
+             <width>474</width>
+             <height>640</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_20">
@@ -1068,7 +1068,7 @@
                       <number>65535</number>
                      </property>
                      <property name="value">
-                      <number>6881</number>
+                      <number>8999</number>
                      </property>
                     </widget>
                    </item>
@@ -1177,7 +1177,7 @@
                   <string>Maximum number of upload slots per torrent:</string>
                  </property>
                  <property name="checked">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -1236,7 +1236,7 @@
                   <string>Global maximum number of upload slots:</string>
                  </property>
                  <property name="checked">
-                  <bool>true</bool>
+                  <bool>false</bool>
                  </property>
                 </widget>
                </item>
@@ -1469,17 +1469,17 @@
                <bool>false</bool>
               </property>
               <layout class="QGridLayout" name="gridLayout_14">
-               <item row="0" column="0">
+               <item row="1" column="0">
                 <widget class="QLabel" name="lblFilterPath">
                  <property name="text">
                   <string>Filter path (.dat, .p2p, .p2b):</string>
                  </property>
                 </widget>
                </item>
-               <item row="0" column="1">
+               <item row="1" column="1">
                 <widget class="QLineEdit" name="textFilterPath"/>
                </item>
-               <item row="0" column="2">
+               <item row="1" column="2">
                 <widget class="QToolButton" name="browseFilterButton">
                  <property name="minimumSize">
                   <size>
@@ -1492,7 +1492,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="0" column="3">
+               <item row="1" column="3">
                 <widget class="QToolButton" name="IpFilterRefreshBtn">
                  <property name="minimumSize">
                   <size>
@@ -1511,6 +1511,13 @@
                    <width>16</width>
                    <height>16</height>
                   </size>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="0">
+                <widget class="QCheckBox" name="checkIpFilterTrackers">
+                 <property name="text">
+                  <string>Apply to trackers</string>
                  </property>
                 </widget>
                </item>
@@ -1538,8 +1545,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>275</width>
-             <height>396</height>
+             <width>474</width>
+             <height>438</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_33">
@@ -1566,15 +1573,12 @@
                    <property name="text">
                     <string>Upload:</string>
                    </property>
-                   <property name="checked">
-                    <bool>true</bool>
-                   </property>
                   </widget>
                  </item>
                  <item row="0" column="1">
                   <widget class="QSpinBox" name="spinUploadLimit">
                    <property name="enabled">
-                    <bool>true</bool>
+                    <bool>false</bool>
                    </property>
                    <property name="suffix">
                     <string/>
@@ -1586,7 +1590,7 @@
                     <number>1000000</number>
                    </property>
                    <property name="value">
-                    <number>50</number>
+                    <number>100</number>
                    </property>
                   </widget>
                  </item>
@@ -1716,13 +1720,6 @@
                  </item>
                  <item row="0" column="1">
                   <layout class="QGridLayout" name="gridLayout_8">
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label_11">
-                     <property name="text">
-                      <string>Upload:</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="0" column="1">
                     <widget class="QSpinBox" name="spinUploadLimitAlt">
                      <property name="minimum">
@@ -1743,15 +1740,11 @@
                      </property>
                     </widget>
                    </item>
-                   <item row="1" column="0">
-                    <widget class="QLabel" name="label_12">
-                     <property name="text">
-                      <string>Download:</string>
-                     </property>
-                    </widget>
-                   </item>
                    <item row="1" column="1">
                     <widget class="QSpinBox" name="spinDownloadLimitAlt">
+                     <property name="enabled">
+                      <bool>false</bool>
+                     </property>
                      <property name="minimum">
                       <number>1</number>
                      </property>
@@ -1767,6 +1760,23 @@
                     <widget class="QLabel" name="label_15">
                      <property name="text">
                       <string>KiB/s</string>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="0" column="0">
+                    <widget class="QCheckBox" name="checkUploadLimitAlt">
+                     <property name="text">
+                      <string>Upload:</string>
+                     </property>
+                     <property name="checked">
+                      <bool>true</bool>
+                     </property>
+                    </widget>
+                   </item>
+                   <item row="1" column="0">
+                    <widget class="QCheckBox" name="checkDownloadLimitAlt">
+                     <property name="text">
+                      <string>Download:</string>
                      </property>
                     </widget>
                    </item>
@@ -1956,8 +1966,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>418</width>
-             <height>442</height>
+             <width>556</width>
+             <height>418</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -2310,8 +2320,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>330</width>
-             <height>480</height>
+             <width>474</width>
+             <height>537</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_23">
@@ -2687,8 +2697,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>98</width>
-             <height>28</height>
+             <width>487</width>
+             <height>342</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="verticalLayout_36"/>
@@ -2791,12 +2801,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>496</x>
-     <y>66</y>
+     <x>544</x>
+     <y>172</y>
     </hint>
     <hint type="destinationlabel">
-     <x>643</x>
-     <y>74</y>
+     <x>603</x>
+     <y>171</y>
     </hint>
    </hints>
   </connection>
@@ -2807,12 +2817,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>494</x>
-     <y>97</y>
+     <x>544</x>
+     <y>198</y>
     </hint>
     <hint type="destinationlabel">
-     <x>611</x>
-     <y>99</y>
+     <x>603</x>
+     <y>197</y>
     </hint>
    </hints>
   </connection>
@@ -2823,12 +2833,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>510</x>
-     <y>123</y>
+     <x>544</x>
+     <y>250</y>
     </hint>
     <hint type="destinationlabel">
-     <x>616</x>
-     <y>126</y>
+     <x>603</x>
+     <y>249</y>
     </hint>
    </hints>
   </connection>
@@ -2839,12 +2849,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>441</y>
+     <x>509</x>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
-     <x>612</x>
-     <y>443</y>
+     <x>584</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>
@@ -2855,12 +2865,12 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>552</x>
-     <y>441</y>
+     <x>509</x>
+     <y>372</y>
     </hint>
     <hint type="destinationlabel">
-     <x>788</x>
-     <y>444</y>
+     <x>721</x>
+     <y>373</y>
     </hint>
    </hints>
   </connection>
@@ -2875,8 +2885,8 @@
      <y>147</y>
     </hint>
     <hint type="destinationlabel">
-     <x>430</x>
-     <y>176</y>
+     <x>711</x>
+     <y>172</y>
     </hint>
    </hints>
   </connection>
@@ -2893,6 +2903,38 @@
     <hint type="destinationlabel">
      <x>571</x>
      <y>224</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkDownloadLimitAlt</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinDownloadLimitAlt</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>292</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>292</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkUploadLimitAlt</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>spinUploadLimitAlt</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>398</x>
+     <y>263</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>477</x>
+     <y>263</y>
     </hint>
    </hints>
   </connection>

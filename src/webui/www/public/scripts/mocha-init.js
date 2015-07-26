@@ -47,7 +47,7 @@ initializeWindows = function() {
         new Event(e).stop();
         new MochaUI.Window({
             id: 'downloadPage',
-            title: "QBT_TR(Download from urls)QBT_TR",
+            title: "QBT_TR(Download from URLs)QBT_TR",
             loadMethod: 'iframe',
             contentURL: 'download.html',
             scrollbars: true,
@@ -181,14 +181,14 @@ initializeWindows = function() {
         }
     };
 
-    setForceStartFN = function(val) {
+    setForceStartFN = function() {
         var h = myTable.selectedIds();
         if (h.length) {
             new Request({
                 url: 'command/setForceStart',
                 method: 'post',
                 data: {
-                    value: val,
+                    value: 'true',
                     hashes: h.join("|")
                 }
             }).send();
@@ -305,10 +305,21 @@ initializeWindows = function() {
                     }
                 }).send();
             });
+            updateMainData();
         }
     };
 
-    ['pauseAll', 'resumeAll', 'pause', 'resume', 'recheck'].each(function(item) {
+    ['pauseAll', 'resumeAll'].each(function(item) {
+        addClickEvent(item, function(e) {
+            new Event(e).stop();
+            new Request({
+                url: 'command/' + item
+            }).send();
+            updateMainData();
+        });
+    });
+
+    ['pause', 'resume', 'recheck'].each(function(item) {
         addClickEvent(item, function(e) {
             new Event(e).stop();
             var h = myTable.selectedIds();
@@ -324,13 +335,6 @@ initializeWindows = function() {
                 });
                 updateMainData();
             }
-        });
-
-        addClickEvent(item + 'All', function(e) {
-            new Event(e).stop();
-            new Request({
-                url: 'command/' + item + 'all'
-            }).send();
         });
     });
 
@@ -359,11 +363,11 @@ initializeWindows = function() {
         new Event(e).stop();
         new MochaUI.Window({
             id: 'aboutpage',
-            title: 'About',
+            title: 'QBT_TR(About)QBT_TR',
             loadMethod: 'xhr',
             contentURL: 'about.html',
-            width: 650,
-            height: 200,
+            width: 550,
+            height: 290,
             padding: 10
         });
     });
@@ -371,7 +375,7 @@ initializeWindows = function() {
     addClickEvent('logout', function(e) {
         new Event(e).stop();
         new Request({
-            url: '/logout',
+            url: 'logout',
             method: 'get',
             onSuccess: function() {
                 window.location.reload();
@@ -381,13 +385,15 @@ initializeWindows = function() {
 
     addClickEvent('shutdown', function(e) {
         new Event(e).stop();
-        new Request({
-            url: 'command/shutdown',
-            onSuccess: function() {
-                document.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>QBT_TR(qBittorrent has been shutdown.)QBT_TR</title><style type=\"text/css\">body { text-align: center; }</style></head><body><h1>QBT_TR(qBittorrent has been shutdown.)QBT_TR</h1></body></html>");
-                stop();
-            }
-        }).send();
+        if (confirm('QBT_TR(Are you sure you want to quit qBittorrent?)QBT_TR')) {
+            new Request({
+                url: 'command/shutdown',
+                onSuccess: function() {
+                    document.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" \"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\"><html xmlns=\"http://www.w3.org/1999/xhtml\"><head><title>QBT_TR(qBittorrent has been shutdown.)QBT_TR</title><style type=\"text/css\">body { text-align: center; }</style></head><body><h1>QBT_TR(qBittorrent has been shutdown.)QBT_TR</h1></body></html>");
+                    stop();
+                }
+            }).send();
+        }
     });
 
     // Deactivate menu header links

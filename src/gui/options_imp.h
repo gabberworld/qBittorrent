@@ -48,7 +48,7 @@ private:
   enum Tabs {TAB_UI, TAB_DOWNLOADS, TAB_CONNECTION, TAB_SPEED, TAB_BITTORRENT, TAB_WEBUI, TAB_ADVANCED};
 
 public:
-  // Contructor / Destructor
+  // Constructor / Destructor
   options_imp(QWidget *parent=0);
   ~options_imp();
 
@@ -118,6 +118,7 @@ private:
   int getPort() const;
   bool isUPnPEnabled() const;
   QPair<int,int> getGlobalBandwidthLimits() const;
+  QPair<int,int> getAltGlobalBandwidthLimits() const;
   // Bittorrent options
   int getMaxConnecs() const;
   int getMaxConnecsPerTorrent() const;

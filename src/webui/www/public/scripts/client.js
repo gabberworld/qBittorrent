@@ -89,7 +89,6 @@ window.addEvent('load', function () {
         width : null,
         resizeLimit : [100, 300]
     });
-    MochaUI.Desktop.setDesktopSize();
 
     setFilter = function (f) {
         // Visually Select the right filter
@@ -129,9 +128,22 @@ window.addEvent('load', function () {
     });
     initializeWindows();
 
+    // Show Top Toolbar is enabled by default
+    if (localStorage.getItem('show_top_toolbar') == null)
+        var showTopToolbar = true;
+    else
+        var showTopToolbar = localStorage.getItem('show_top_toolbar') == "true";
+    if (!showTopToolbar) {
+        $('showTopToolbarLink').firstChild.style.opacity = '0';
+        $('mochaToolbar').addClass('invisible');
+    }
+
     var speedInTitle = localStorage.getItem('speed_in_browser_title_bar') == "true";
     if (!speedInTitle)
         $('speedInBrowserTitleBarLink').firstChild.style.opacity = '0';
+
+    // After Show Top Toolbar
+    MochaUI.Desktop.setDesktopSize();
 
     var syncMainDataLastResponseId = 0;
     var serverState = {};
@@ -162,11 +174,11 @@ window.addEvent('load', function () {
                             response['torrents'][key]['hash'] = key;
                             myTable.updateRowData(response['torrents'][key]);
                         }
-                    myTable.updateTable(full_update);
                     if (response['torrents_removed'])
                         response['torrents_removed'].each(function (hash) {
                             myTable.removeRow(hash);
                         });
+                    myTable.updateTable(full_update);
                     myTable.altRow();
                     if (response['server_state']) {
                         var tmp = response['server_state'];
@@ -200,10 +212,11 @@ window.addEvent('load', function () {
         transfer_info += friendlyUnit(serverState.up_info_speed, true)
         transfer_info += " (" + friendlyUnit(serverState.up_info_data, false) + ")"
         $("UpInfos").set('html', transfer_info);
-        if (speedInTitle)
-            document.title = "QBT_TR(D:%1 U:%2)QBT_TR".replace("%1", friendlyUnit(serverState.dl_info_speed, true)).replace("%2", friendlyUnit(serverState.up_info_speed, true));
-        else
-            document.title = "QBT_TR(qBittorrent web User Interface)QBT_TR";
+        if (speedInTitle) {
+            document.title = "QBT_TR([D:%1 U:%2])QBT_TR".replace("%1", friendlyUnit(serverState.dl_info_speed, true)).replace("%2", friendlyUnit(serverState.up_info_speed, true));
+            document.title += " qBittorrent ${VERSION} QBT_TR(Web UI)QBT_TR";
+        }else
+            document.title = "qBittorrent ${VERSION} QBT_TR(Web UI)QBT_TR";
         $('DHTNodes').set('html', 'QBT_TR(DHT: %1 nodes)QBT_TR'.replace("%1", serverState.dht_nodes));
         if (serverState.connection_status == "connected")
             $('connectionStatus').src = 'images/skin/connected.png';
@@ -217,10 +230,12 @@ window.addEvent('load', function () {
             myTable.columns['priority'].force_hide = !queueing_enabled;
             myTable.updateColumn('priority');
             if (queueing_enabled) {
+                $('queueingLinks').removeClass('invisible');
                 $('queueingButtons').removeClass('invisible');
                 $('queueingMenuItems').removeClass('invisible');
             }
             else {
+                $('queueingLinks').addClass('invisible');
                 $('queueingButtons').addClass('invisible');
                 $('queueingMenuItems').addClass('invisible');
             }
@@ -267,6 +282,20 @@ window.addEvent('load', function () {
         myTable.setSortedColumn(column);
         updateMainData();
     };
+
+    $('showTopToolbarLink').addEvent('click', function(e) {
+        showTopToolbar = !showTopToolbar;
+        localStorage.setItem('show_top_toolbar', showTopToolbar.toString());
+        if (showTopToolbar) {
+            $('showTopToolbarLink').firstChild.style.opacity = '1';
+            $('mochaToolbar').removeClass('invisible');
+        }
+        else {
+            $('showTopToolbarLink').firstChild.style.opacity = '0';
+            $('mochaToolbar').addClass('invisible');
+        }
+        MochaUI.Desktop.setDesktopSize();
+    });
 
     $('speedInBrowserTitleBarLink').addEvent('click', function(e) {
         speedInTitle = !speedInTitle;
@@ -315,7 +344,7 @@ window.addEvent('load', function () {
         contentURL : 'properties_content.html',
         require : {
             css : ['css/Tabs.css'],
-            js : ['scripts/prop-general.js', 'scripts/prop-trackers.js', 'scripts/prop-files.js'],
+            js : ['scripts/prop-general.js', 'scripts/prop-trackers.js', 'scripts/prop-webseeds.js', 'scripts/prop-files.js'],
         },
         tabsURL : 'properties.html',
         tabsOnload : function() {
@@ -326,6 +355,8 @@ window.addEvent('load', function () {
                     updateTorrentData();
                 else if (!$('prop_trackers').hasClass('invisible'))
                     updateTrackersData();
+                else if (!$('prop_webseeds').hasClass('invisible'))
+                    updateWebSeedsData();
                 else if (!$('prop_files').hasClass('invisible'))
                     updateTorrentFilesData();
             }
@@ -333,6 +364,7 @@ window.addEvent('load', function () {
             $('PropGeneralLink').addEvent('click', function(e){
                 $('prop_general').removeClass("invisible");
                 $('prop_trackers').addClass("invisible");
+                $('prop_webseeds').addClass("invisible");
                 $('prop_files').addClass("invisible");
                 updatePropertiesPanel();
             });
@@ -340,6 +372,15 @@ window.addEvent('load', function () {
             $('PropTrackersLink').addEvent('click', function(e){
                 $('prop_trackers').removeClass("invisible");
                 $('prop_general').addClass("invisible");
+                $('prop_webseeds').addClass("invisible");
+                $('prop_files').addClass("invisible");
+                updatePropertiesPanel();
+            });
+
+            $('PropWebSeedsLink').addEvent('click', function(e){
+                $('prop_webseeds').removeClass("invisible");
+                $('prop_general').addClass("invisible");
+                $('prop_trackers').addClass("invisible");
                 $('prop_files').addClass("invisible");
                 updatePropertiesPanel();
             });
@@ -348,6 +389,11 @@ window.addEvent('load', function () {
                 $('prop_files').removeClass("invisible");
                 $('prop_general').addClass("invisible");
                 $('prop_trackers').addClass("invisible");
+                $('prop_webseeds').addClass("invisible");
+                updatePropertiesPanel();
+            });
+
+            $('propertiesPanel_collapseToggle').addEvent('click', function(e){
                 updatePropertiesPanel();
             });
         },

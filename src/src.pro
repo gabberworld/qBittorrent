@@ -16,10 +16,11 @@ os2: include(../os2conf.pri)
 
 nogui {
     QT -= gui
-    DEFINES += DISABLE_GUI
+    DEFINES += DISABLE_GUI DISABLE_COUNTRIES_RESOLUTION
     TARGET = qbittorrent-nox
 } else {
     QT += xml
+    QT += concurrent
     CONFIG(static) {
         DEFINES += QBT_STATIC_QT
         QTPLUGIN += qico
@@ -56,6 +57,8 @@ DEFINES += BOOST_FILESYSTEM_VERSION=2
 
 win32: DEFINES += NOMINMAX
 
+INCLUDEPATH += $$PWD
+
 include(app/app.pri)
 include(core/core.pri)
 !nowebui: include(webui/webui.pri)
@@ -65,6 +68,7 @@ include(core/core.pri)
 }
 
 # Resource files
+QMAKE_RESOURCE_FLAGS += -compress 9 -threshold 5
 RESOURCES += \
     icons.qrc \
     lang.qrc
@@ -74,6 +78,7 @@ TRANSLATIONS = \
     $$LANG_PATH/qbittorrent_fr.ts \
     $$LANG_PATH/qbittorrent_zh.ts \
     $$LANG_PATH/qbittorrent_zh_TW.ts \
+    $$LANG_PATH/qbittorrent_zh_HK.ts \
     $$LANG_PATH/qbittorrent_en.ts \
     $$LANG_PATH/qbittorrent_en_AU.ts \
     $$LANG_PATH/qbittorrent_en_GB.ts \
@@ -89,6 +94,7 @@ TRANSLATIONS = \
     $$LANG_PATH/qbittorrent_ru.ts \
     $$LANG_PATH/qbittorrent_uk.ts \
     $$LANG_PATH/qbittorrent_bg.ts \
+    $$LANG_PATH/qbittorrent_id.ts \
     $$LANG_PATH/qbittorrent_it.ts \
     $$LANG_PATH/qbittorrent_sk.ts \
     $$LANG_PATH/qbittorrent_ro.ts \

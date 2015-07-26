@@ -43,6 +43,8 @@
 
 #include <libtorrent/version.hpp>
 
+#include "core/types.h"
+
 enum scheduler_days
 {
     EVERY_DAY,
@@ -55,12 +57,6 @@ enum scheduler_days
     FRI,
     SAT,
     SUN
-};
-
-enum maxRatioAction
-{
-    PAUSE_ACTION,
-    REMOVE_ACTION
 };
 
 namespace Proxy
@@ -101,7 +97,9 @@ class Preferences: public QObject
     Q_DISABLE_COPY(Preferences)
 
 private:
-    explicit Preferences();
+    Preferences();
+    ~Preferences();
+
     static Preferences* m_instance;
     QHash<QString, QVariant> m_data;
     int m_randomPort;
@@ -111,16 +109,16 @@ private:
     const QVariant value(const QString &key, const QVariant &defaultValue = QVariant()) const;
     void setValue(const QString &key, const QVariant &value);
 
+private slots:
+    bool save();
+
 signals:
     void changed();
 
-public slots:
-    void save();
-
 public:
+    static void initInstance();
+    static void freeInstance();
     static Preferences* instance();
-    static void drop();
-    ~Preferences();
 
     // General options
     QString getLocale() const;
@@ -276,12 +274,14 @@ public:
     void setEncryptionSetting(int val);
     qreal getGlobalMaxRatio() const;
     void setGlobalMaxRatio(qreal ratio);
-    int getMaxRatioAction() const;
-    void setMaxRatioAction(int act);
+    MaxRatioAction getMaxRatioAction() const;
+    void setMaxRatioAction(MaxRatioAction act);
 
     // IP Filter
     bool isFilteringEnabled() const;
     void setFilteringEnabled(bool enabled);
+    bool isFilteringTrackerEnabled() const;
+    void setFilteringTrackerEnabled(bool enabled);
     QString getFilter() const;
     void setFilter(const QString &path);
     QStringList bannedIPs() const;
@@ -424,6 +424,8 @@ public:
 #endif
     bool confirmTorrentDeletion() const;
     void setConfirmTorrentDeletion(bool enabled);
+    bool confirmTorrentRecheck() const;
+    void setConfirmTorrentRecheck(bool enabled);
     TrayIcon::Style trayIconStyle() const;
     void setTrayIconStyle(TrayIcon::Style style);
 
@@ -532,10 +534,18 @@ public:
     QList<QNetworkCookie> getHostNameQNetworkCookies(const QString& host_name) const;
     void setHostNameCookies(const QString &host_name, const QList<QByteArray> &cookies);
 
+    // SpeedWidget
+    int getSpeedWidgetPeriod() const;
+    void setSpeedWidgetPeriod(const int period);
+    bool getSpeedWidgetGraphEnable(int id) const;
+    void setSpeedWidgetGraphEnable(int id, const bool enable);
+
 public slots:
     void setStatusFilterState(bool checked);
     void setLabelFilterState(bool checked);
     void setTrackerFilterState(bool checked);
+
+    void apply();
 };
 
 #endif // PREFERENCES_H

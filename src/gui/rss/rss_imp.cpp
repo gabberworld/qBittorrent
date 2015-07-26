@@ -39,9 +39,10 @@
 
 #include "rss_imp.h"
 #include "feedlistwidget.h"
-#include "qbtsession.h"
+#include "core/bittorrent/session.h"
+#include "core/net/downloadmanager.h"
 #include "cookiesdlg.h"
-#include "preferences.h"
+#include "core/preferences.h"
 #include "rsssettingsdlg.h"
 #include "rssmanager.h"
 #include "rssfolder.h"
@@ -49,8 +50,9 @@
 #include "rssparser.h"
 #include "rssfeed.h"
 #include "automatedrssdownloader.h"
-#include "iconprovider.h"
+#include "guiiconprovider.h"
 #include "autoexpandabledialog.h"
+#include "addnewtorrentdialog.h"
 
 namespace Article
 {
@@ -140,6 +142,7 @@ void RSSImp::on_actionManage_cookies_triggered()
     if (ok) {
         qDebug() << "Settings cookies for host name: " << feed_hostname;
         pref->setHostNameCookies(feed_hostname, raw_cookies);
+        Net::DownloadManager::instance()->setCookiesFromUrl(pref->getHostNameQNetworkCookies(feed_hostname), feed_hostname);
     }
 }
 
@@ -201,7 +204,7 @@ void RSSImp::on_newFeedButton_clicked()
     if (clip_txt.startsWith("http://", Qt::CaseInsensitive) || clip_txt.startsWith("https://", Qt::CaseInsensitive) || clip_txt.startsWith("ftp://", Qt::CaseInsensitive))
         default_url = clip_txt;
 
-    QString newUrl = AutoExpandableDialog::getText(this, tr("Please type a rss stream url"), tr("Stream URL:"), QLineEdit::Normal, default_url, &ok);
+    QString newUrl = AutoExpandableDialog::getText(this, tr("Please type a RSS stream URL"), tr("Stream URL:"), QLineEdit::Normal, default_url, &ok);
     if (!ok)
         return;
 
@@ -211,7 +214,7 @@ void RSSImp::on_newFeedButton_clicked()
 
     if (m_feedList->hasFeed(newUrl)) {
         QMessageBox::warning(this, "qBittorrent",
-                             tr("This rss feed is already in the list."),
+                             tr("This RSS feed is already in the list."),
                              QMessageBox::Ok);
         return;
     }
@@ -341,19 +344,10 @@ void RSSImp::downloadSelectedTorrents()
         RssArticlePtr article = feed->getItem(item->data(Article::IdRole).toString());
         if (!article) continue;
 
-        QString torrentLink = article->torrentUrl();
-        // Check if it is a magnet link
-        if (torrentLink.startsWith("magnet:", Qt::CaseInsensitive)) {
-            QBtSession::instance()->addMagnetInteractive(torrentLink);
-        }
-        else {
-            // Load possible cookies
-            QString feed_url = m_feedList->getItemID(m_feedList->selectedItems().first());
-            QString feed_hostname = QUrl::fromEncoded(feed_url.toUtf8()).host();
-            QList<QNetworkCookie> cookies = Preferences::instance()->getHostNameQNetworkCookies(feed_hostname);
-            qDebug("Loaded %d cookies for RSS item\n", cookies.size());
-            QBtSession::instance()->downloadFromUrl(torrentLink, cookies);
-        }
+        if (Preferences::instance()->useAdditionDialog())
+            AddNewTorrentDialog::show(article->torrentUrl());
+        else
+            BitTorrent::Session::instance()->addTorrent(article->torrentUrl());
     }
 }
 
@@ -643,8 +637,10 @@ void RSSImp::updateItemInfos(QTreeWidgetItem *item)
         return;
 
     QString name;
-    if (rss_item == m_rssManager)
+    if (rss_item == m_rssManager) {
         name = tr("Unread");
+        emit updateRSSCount(rss_item->unreadCount());
+    }
     else
         name = rss_item->displayName();
     item->setText(0, name + QString::fromUtf8("  (") + QString::number(rss_item->unreadCount()) + QString(")"));
@@ -700,22 +696,22 @@ RSSImp::RSSImp(QWidget *parent):
 {
     setupUi(this);
     // Icons
-    actionCopy_feed_URL->setIcon(IconProvider::instance()->getIcon("edit-copy"));
-    actionDelete->setIcon(IconProvider::instance()->getIcon("edit-delete"));
-    actionDownload_torrent->setIcon(IconProvider::instance()->getIcon("download"));
-    actionManage_cookies->setIcon(IconProvider::instance()->getIcon("preferences-web-browser-cookies"));
-    actionMark_items_read->setIcon(IconProvider::instance()->getIcon("mail-mark-read"));
-    actionNew_folder->setIcon(IconProvider::instance()->getIcon("folder-new"));
-    actionNew_subscription->setIcon(IconProvider::instance()->getIcon("list-add"));
-    actionOpen_news_URL->setIcon(IconProvider::instance()->getIcon("application-x-mswinurl"));
-    actionRename->setIcon(IconProvider::instance()->getIcon("edit-rename"));
-    actionUpdate->setIcon(IconProvider::instance()->getIcon("view-refresh"));
-    actionUpdate_all_feeds->setIcon(IconProvider::instance()->getIcon("view-refresh"));
-    newFeedButton->setIcon(IconProvider::instance()->getIcon("list-add"));
-    markReadButton->setIcon(IconProvider::instance()->getIcon("mail-mark-read"));
-    updateAllButton->setIcon(IconProvider::instance()->getIcon("view-refresh"));
-    rssDownloaderBtn->setIcon(IconProvider::instance()->getIcon("download"));
-    settingsButton->setIcon(IconProvider::instance()->getIcon("preferences-system"));
+    actionCopy_feed_URL->setIcon(GuiIconProvider::instance()->getIcon("edit-copy"));
+    actionDelete->setIcon(GuiIconProvider::instance()->getIcon("edit-delete"));
+    actionDownload_torrent->setIcon(GuiIconProvider::instance()->getIcon("download"));
+    actionManage_cookies->setIcon(GuiIconProvider::instance()->getIcon("preferences-web-browser-cookies"));
+    actionMark_items_read->setIcon(GuiIconProvider::instance()->getIcon("mail-mark-read"));
+    actionNew_folder->setIcon(GuiIconProvider::instance()->getIcon("folder-new"));
+    actionNew_subscription->setIcon(GuiIconProvider::instance()->getIcon("list-add"));
+    actionOpen_news_URL->setIcon(GuiIconProvider::instance()->getIcon("application-x-mswinurl"));
+    actionRename->setIcon(GuiIconProvider::instance()->getIcon("edit-rename"));
+    actionUpdate->setIcon(GuiIconProvider::instance()->getIcon("view-refresh"));
+    actionUpdate_all_feeds->setIcon(GuiIconProvider::instance()->getIcon("view-refresh"));
+    newFeedButton->setIcon(GuiIconProvider::instance()->getIcon("list-add"));
+    markReadButton->setIcon(GuiIconProvider::instance()->getIcon("mail-mark-read"));
+    updateAllButton->setIcon(GuiIconProvider::instance()->getIcon("view-refresh"));
+    rssDownloaderBtn->setIcon(GuiIconProvider::instance()->getIcon("download"));
+    settingsButton->setIcon(GuiIconProvider::instance()->getIcon("preferences-system"));
 
     m_feedList = new FeedListWidget(splitter_h, m_rssManager);
     splitter_h->insertWidget(0, m_feedList);

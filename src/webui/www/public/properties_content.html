@@ -15,13 +15,8 @@
     <tr><td style="text-align:right; padding: 4px;">QBT_TR(Created on:)QBT_TR</td><td id="creation_date"></td></tr>
     <tr><td style="text-align:right; padding: 4px;">QBT_TR(Piece size:)QBT_TR</td><td id="piece_size"></td></tr>
     <tr><td style="text-align:right; padding: 4px;">QBT_TR(Torrent hash:)QBT_TR</td><td id="torrent_hash"></td></tr>
-    <tr><td style="vertical-align: top;  padding: 4px; text-align:right;">
-    <br/>
-    QBT_TR(Comment:)QBT_TR
-    </td><td>
-    <textarea name="comment" id="comment" rows="15" cols="80" readonly>
-    </textarea>
-    </td></tr>
+    <tr><td style="vertical-align: top;  padding: 4px; text-align:right;">QBT_TR(Comment:)QBT_TR</td>
+    <td><textarea name="comment" id="comment" rows="5" cols="80" readonly></textarea></td></tr>
     </table>
     <br/>
     </fieldset>
@@ -32,13 +27,26 @@
         <table class="torrentTable" cellpadding="0" cellspacing="0" style="width: 100%">
             <thead>
                 <tr>
-                    <th>QBT_TR(URL)QBT_TR <img src="theme/list-add" id="addTrackersPlus"/></th>
-                    <th style="width: 250px;">QBT_TR(Status)QBT_TR</th>
-                    <th style="width: 150px;">QBT_TR(Peers)QBT_TR</th>
-                    <th style="width: 200px;">QBT_TR(Message)QBT_TR</th>
+                    <th style="width: 30%;">QBT_TR(URL)QBT_TR <img src="theme/list-add" id="addTrackersPlus"/></th>
+                    <th style="width: 10%;">QBT_TR(Status)QBT_TR</th>
+                    <th style="width: 10%;">QBT_TR(Peers)QBT_TR</th>
+                    <th style="width: 50%;">QBT_TR(Message)QBT_TR</th>
                 </tr>
             </thead>
             <tbody id="trackersTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<div id="prop_webseeds" class="invisible">
+    <div id="webseeds">
+        <table class="torrentTable" cellpadding="0" cellspacing="0" style="width: 100%">
+            <thead>
+                <tr>
+                    <th>QBT_TR(URL)QBT_TR</th>
+                </tr>
+            </thead>
+            <tbody id="webseedsTable"></tbody>
         </table>
     </div>
 </div>

@@ -38,14 +38,28 @@
 #include "qtsingleapplication.h"
 typedef QtSingleApplication BaseApplication;
 class MainWindow;
+
+#ifdef Q_OS_WIN
+QT_BEGIN_NAMESPACE
+class QSessionManager;
+QT_END_NAMESPACE
+#endif // Q_OS_WIN
+
 #else
 #include "qtsinglecoreapplication.h"
 typedef QtSingleCoreApplication BaseApplication;
 #endif
 
+#include "core/utils/misc.h"
+
 #ifndef DISABLE_WEBUI
 class WebUI;
 #endif
+
+namespace BitTorrent
+{
+    class TorrentHandle;
+}
 
 class Application : public BaseApplication
 {
@@ -70,13 +84,19 @@ protected:
 
 private slots:
     void processMessage(const QString &message);
+    void torrentFinished(BitTorrent::TorrentHandle *const torrent);
+    void allTorrentsFinished();
     void cleanup();
+#if (!defined(DISABLE_GUI) && defined(Q_OS_WIN))
+    void shutdownCleanup(QSessionManager &manager);
+#endif
 
 private:
     bool m_running;
 
 #ifndef DISABLE_GUI
     QPointer<MainWindow> m_window;
+    ShutdownAction m_shutdownAct;
 #endif
 
 #ifndef DISABLE_WEBUI
@@ -89,6 +109,7 @@ private:
 
     void initializeTranslation();
     void processParams(const QStringList &params);
+    void sendNotificationEmail(BitTorrent::TorrentHandle *const torrent);
 };
 
 #endif // APPLICATION_H
